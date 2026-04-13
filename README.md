@@ -13,5 +13,5 @@ This awesome app specializes in providing numerical values of rotten tomatoes, I
 * **Data Aggregation:** Successfully fetching and parsing diverse rating formats from the IMDb/OMDb data structures.
 * **Responsive Design:** Ensuring a seamless experience across desktop and mobile devices.
 
-## 🔗 Link to the app:
-[WIP]
+## 🔗 Link to the app
+https://movie-rating-b1ws.onrender.com/?title=Backrooms?&ai=true
