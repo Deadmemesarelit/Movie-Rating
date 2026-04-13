@@ -15,7 +15,7 @@ function getRequestedTitle() {
     return urlTitle.trim();
   }
   const pageTitle = movieTitleEl?.textContent?.trim();
-  return pageTitle || 'Backrooms';
+  return pageTitle || '';
 }
 
 function isAiEnabled() {
