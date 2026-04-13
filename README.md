@@ -7,6 +7,7 @@ This awesome app specializes in providing numerical values of rotten tomatoes, I
 * **Backend:** Node.js, Express
 * **Environment:** dotenv (.env) for API key security
 * **APIs:** Groq Cloud API (AI summaries), OMDb API (Movie data)
+* **AI Assisstance:** GitHub Copilot and Google Gemini
 
 ## 🚀 Challenges conquered
 * **AI Integration:** Implementing Groq's API to generate concise, relevant movie summaries in real-time.
