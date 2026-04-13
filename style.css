@@ -1,0 +1,223 @@
+@import url('https://fonts.googleapis.com/css2?family=Archivo+Black&display=swap');
+
+:root {
+  --start: #ff8a00;
+  --end: #8a2be2;
+  --card-bg: rgba(255, 255, 255, 0.12);
+  --panel-bg: rgba(255, 255, 255, 0.14);
+  --text: #f8f3e9;
+  --muted-text: #dcd6d0;
+  --border: rgba(255, 255, 255, 0.22);
+}
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  min-height: 100vh;
+  font-family: 'Archivo Black', sans-serif;
+  color: var(--text);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  background: radial-gradient(circle at top left, rgba(255, 205, 120, 0.35), transparent 35%),
+    linear-gradient(135deg, var(--start), var(--end));
+}
+
+.container {
+  width: min(460px, calc(100% - 32px));
+  background: var(--card-bg);
+  backdrop-filter: blur(18px);
+  border: 1px solid var(--border);
+  border-radius: 32px;
+  padding: 28px;
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+  box-shadow: 0 0 30px rgba(19, 100, 83, 0.25);
+
+}
+
+.search-form {
+  width: 100%;
+}
+
+.search-input-group {
+  display: flex;
+  gap: 12px;
+  width: 100%;
+}
+
+.search-input {
+  flex: 1;
+  min-width: 0;
+  padding: 14px 16px;
+  border: 1px solid var(--border);
+  border-radius: 20px;
+  background: rgba(255, 255, 255, 0.16);
+  color: var(--text);
+  font-size: 1rem;
+  outline: none;
+}
+
+.search-input:focus {
+  border-color: rgba(255, 255, 255, 0.8);
+  box-shadow: 0 0 0 4px rgba(255, 255, 255, 0.14);
+}
+
+.search-button {
+  padding: 14px 20px;
+  border: none;
+  border-radius: 20px;
+  background: rgba(255, 165, 0, 0.95);
+  color: #1a0a00;
+  font-weight: 700;
+  cursor: pointer;
+  transition: transform 0.18s ease, background 0.18s ease;
+}
+
+.search-button:hover {
+  background: rgba(255, 190, 96, 1);
+  transform: translateY(-1px);
+}
+
+.movie-poster-ratings {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  align-items: center;
+}
+
+.movie-title {
+  font-size: clamp(2rem, 4vw, 2.4rem);
+  text-align: center;
+  letter-spacing: 0.08em;
+  line-height: 1.1;
+  animation: movie-title-color-Change 6s ease-in-out infinite;
+}
+
+.image-placeholder {
+  width: 100%;
+  display: flex;
+  justify-content: center;
+}
+
+.movie-poster {
+  width: 100%;
+  max-width: 280px;
+  aspect-ratio: 2 / 3;
+  object-fit: cover;
+  border-radius: 22px;
+  border: 2px solid rgba(255, 165, 0, 0.85);
+  box-shadow: 0 18px 40px rgba(0, 0, 0, 0.28);
+}
+
+.section-panel {
+  width: 100%;
+  background: var(--panel-bg);
+  border: 1px solid var(--border);
+  border-radius: 24px;
+  padding: 18px 20px;
+}
+
+.section-title {
+  margin: -6px -20px 16px;
+  padding: 14px 20px;
+  background: rgba(255, 255, 255, 0.08);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.12);
+  border-top-left-radius: 24px;
+  border-top-right-radius: 24px;
+  color: var(--text);
+  font-size: 1rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.ratings-info {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 14px;
+  width: 100%;
+}
+
+.rating-pill {
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  border-radius: 18px;
+  padding: 16px 14px;
+  text-align: center;
+  color: var(--text);
+  min-height: 76px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: 6px;
+}
+
+.rating-pill strong {
+  display: block;
+  font-size: 0.85rem;
+  color: var(--muted-text);
+}
+
+.rating-pill span {
+  font-size: 1.25rem;
+  color: var(--text);
+}
+
+.movie-info,
+.ai-summary {
+  width: 100%;
+  background: var(--panel-bg);
+  border: 1px solid var(--border);
+  border-radius: 24px;
+  padding: 18px 20px;
+  color: var(--muted-text);
+  line-height: 1.6;
+}
+
+.movie-info {
+  min-height: 90px;
+}
+
+.ai-summary {
+  min-height: 120px;
+}
+
+@keyframes movie-title-color-Change {
+  0%,
+  100% {
+    color: #ffffff;
+  }
+  50% {
+    color: #ffd98d;
+  }
+}
+
+@media (max-width: 420px) {
+  .container {
+    padding: 20px;
+  }
+
+  .ratings-info h2 {
+    padding: 14px 12px;
+    font-size: 0.95rem;
+  }
+
+    .ratings-info {
+    grid-template-columns: 1fr;
+  }
+  
+  .search-input-group {
+    flex-direction: column; 
+  }
+
+}
+
+
+
+
+
