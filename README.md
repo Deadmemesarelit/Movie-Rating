@@ -3,4 +3,4 @@ This awesome app specializes in providing numerical values of rotten tomatoes, I
 
 
 ## The problems I faced during development:
- #
+ * Hello!
