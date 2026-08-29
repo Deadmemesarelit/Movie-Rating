@@ -11,7 +11,7 @@ const GROQ_API_KEY = process.env.GROQ_API_KEY;
 const twentyTwentyFive = process.env.REDACTED;
 
 if (!OMDB_API_KEY) {
-  console.warn('Warning: OMDB_API_KEY / IMDB_API_KEY / IMBD_API_KEY is not set in apis.env. Movie lookups will fail.');
+  console.warn('Warning: OMDB_API_KEY / IMDB_API_KEY / IMBD_API_KEY is not set. Movie lookups will fail.');
 }
 
 if (!GROQ_API_KEY) {
@@ -20,6 +20,78 @@ if (!GROQ_API_KEY) {
 
 app.use(express.static(path.join(__dirname)));
 
+const SKIP_MODEL_PARTS = [
+  'whisper',
+  'guard',
+  'orpheus',
+  'compound',
+  'tts',
+  'safeguard'
+];
+
+const PREFERRED_MODELS = [
+  'openai/gpt-oss-20b',
+  'openai/gpt-oss-120b',
+  'qwen/qwen3.8-27b',
+  'qwen/qwen3.6-27b',
+  'llama-3.1-8b-instant',
+  'llama-3.3-70b-versatile'
+];
+
+let cachedModelId = process.env.GROQ_MODEL || null;
+let cachedModelAt = 0;
+const MODEL_CACHE_MS = 1000 * 60 * 60;
+
+function isChatModel(id) {
+  const lower = String(id || '').toLowerCase();
+  return !SKIP_MODEL_PARTS.some((part) => lower.includes(part));
+}
+
+async function listGroqModels() {
+  const response = await fetch('https://api.groq.com/openai/v1/models', {
+    headers: {
+      Authorization: `Bearer ${GROQ_API_KEY}`,
+      'Content-Type': 'application/json'
+    }
+  });
+
+  const data = await response.json();
+  if (!response.ok) {
+    throw new Error(data?.error?.message || 'Failed to list Groq models.');
+  }
+
+  return Array.isArray(data.data) ? data.data : [];
+}
+
+async function resolveGroqModel() {
+  if (process.env.GROQ_MODEL) {
+    return process.env.GROQ_MODEL;
+  }
+
+  const now = Date.now();
+  if (cachedModelId && now - cachedModelAt < MODEL_CACHE_MS) {
+    return cachedModelId;
+  }
+
+  const models = await listGroqModels();
+  const chatModels = models.filter((model) => isChatModel(model.id));
+  const availableIds = new Set(chatModels.map((model) => model.id));
+
+  const preferredHit = PREFERRED_MODELS.find((id) => availableIds.has(id));
+  if (preferredHit) {
+    cachedModelId = preferredHit;
+    cachedModelAt = now;
+    console.log(`Using Groq model: ${cachedModelId}`);
+    return cachedModelId;
+  }
+
+  chatModels.sort((a, b) => (b.created || 0) - (a.created || 0));
+  cachedModelId = chatModels[0]?.id || 'openai/gpt-oss-20b';
+  cachedModelAt = now;
+  console.log(`Using Groq model: ${cachedModelId}`);
+  return cachedModelId;
+}
+
 app.get('/api/movie', async (req, res) => {
   const title = String(req.query.title || '').trim();
   if (!title) {
@@ -27,14 +99,15 @@ app.get('/api/movie', async (req, res) => {
   }
 
   if (!OMDB_API_KEY) {
-    return res.status(500).json({ error: 'Missing IMBD_API_KEY in environment.' });
+    return res.status(500).json({ error: 'Missing OMDB_API_KEY in environment.' });
   }
 
   try {
-    if (title.toLowerCase() === 'REDACTED') {
-        return res.json(twentyTwentyFive);
+    if (title.toLowerCase() === 'redacted') {
+      return res.json(twentyTwentyFive);
     }
-    const omdbUrl = new URL('http://www.omdbapi.com/');
+
+    const omdbUrl = new URL('https://www.omdbapi.com/');
     omdbUrl.searchParams.set('apikey', OMDB_API_KEY);
     omdbUrl.searchParams.set('t', title);
     omdbUrl.searchParams.set('plot', 'full');
@@ -43,8 +116,7 @@ app.get('/api/movie', async (req, res) => {
     let omdbData = await omdbResponse.json();
 
     if (omdbData.Response === 'False') {
-      // Try a broader search if exact title lookup failed.
-      const searchUrl = new URL('http://www.omdbapi.com/');
+      const searchUrl = new URL('https://www.omdbapi.com/');
       searchUrl.searchParams.set('apikey', OMDB_API_KEY);
       searchUrl.searchParams.set('s', title);
       searchUrl.searchParams.set('type', 'movie');
@@ -54,7 +126,7 @@ app.get('/api/movie', async (req, res) => {
 
       if (searchData.Response === 'True' && Array.isArray(searchData.Search) && searchData.Search.length > 0) {
         const firstResult = searchData.Search[0];
-        const detailUrl = new URL('http://www.omdbapi.com/');
+        const detailUrl = new URL('https://www.omdbapi.com/');
         detailUrl.searchParams.set('apikey', OMDB_API_KEY);
         detailUrl.searchParams.set('i', firstResult.imdbID);
         detailUrl.searchParams.set('plot', 'full');
@@ -89,7 +161,7 @@ app.get('/api/movie', async (req, res) => {
       raw: omdbData
     };
 
-    if (req.query.ai === 'true') {
+    if (req.query.ai !== 'false') {
       let aiSummary = null;
       let aiError = null;
 
@@ -114,16 +186,22 @@ async function generateAiSummary(movie) {
     throw new Error('Groq API key is not configured.');
   }
 
-  const prompt = `Provide a short and simple summery of the movie: ${movie.title}`;
+  const model = await resolveGroqModel();
+  const prompt = [
+    `Write a short, simple summary of the movie "${movie.title}" (${movie.year || 'year unknown'}).`,
+    movie.genre ? `Genre: ${movie.genre}.` : '',
+    movie.plot ? `Plot from the database: ${movie.plot}` : '',
+    'Keep it to 3 or 4 sentences. Do not invent awards or ratings.'
+  ].filter(Boolean).join(' ');
 
   const response = await fetch('https://api.groq.com/openai/v1/chat/completions', {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
-      'Authorization': `Bearer ${GROQ_API_KEY}` 
+      Authorization: `Bearer ${GROQ_API_KEY}`
     },
     body: JSON.stringify({
-      model: 'openai/gpt-oss-120b',
+      model,
       messages: [
         { role: 'system', content: 'You are a helpful movie summary assistant.' },
         { role: 'user', content: prompt }
@@ -136,6 +214,8 @@ async function generateAiSummary(movie) {
   const data = await response.json();
 
   if (!response.ok) {
+    cachedModelId = null;
+    cachedModelAt = 0;
     const errorMessage = data?.error?.message || 'Groq API returned an error.';
     throw new Error(errorMessage);
   }
@@ -145,5 +225,5 @@ async function generateAiSummary(movie) {
 
 app.listen(PORT, () => {
   console.log(`Movie Ratings server running on http://localhost:${PORT}`);
-  console.log('Use /api/movie?title=Backrooms or /api/movie?title=Backrooms&ai=true');
+  console.log('Use /api/movie?title=Backrooms');
 });
