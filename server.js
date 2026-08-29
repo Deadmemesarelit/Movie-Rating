@@ -207,7 +207,7 @@ async function generateAiSummary(movie) {
         { role: 'user', content: prompt }
       ],
       temperature: 0.8,
-      max_tokens: 220
+      max_tokens: 1024
     })
   });
 
