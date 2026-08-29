@@ -107,11 +107,6 @@ function handleSearch(event) {
   event.preventDefault();
   if (!searchInputEl) return;
 
-  if (searchInputEl.value.trim() === "2025") {
-    december();
-    return;
-  }
-
   const query = searchInputEl.value.trim();
   if (!query) return;
 
@@ -176,13 +171,4 @@ window.addEventListener('DOMContentLoaded', () => {
   searchFormEl?.addEventListener('submit', handleSearch);
 });
 
-function december(){
-    const music = new Audio('./music/EverythingIsOkay.mp3');
-    music.play();
-    movieInfoEl.textContent = 'You found it...';
-    aiSummaryEl.textContent = `... December 2025, I found myself. And everyday is a day to [REDACTED].`;
-    posterEl.src = './images/December_2025.webp';
-    posterEl.alt = 'December 2025';
-    ratingsInfoEl.innerHTML = '';
-    searchInputEl.value = '';
-}
+
