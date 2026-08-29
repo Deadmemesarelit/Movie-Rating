@@ -123,7 +123,7 @@ async function generateAiSummary(movie) {
       'Authorization': `Bearer ${GROQ_API_KEY}` 
     },
     body: JSON.stringify({
-      model: 'llama-3.3-70b-versatile', 
+      model: 'openai/gpt-oss-120b',
       messages: [
         { role: 'system', content: 'You are a helpful movie summary assistant.' },
         { role: 'user', content: prompt }
