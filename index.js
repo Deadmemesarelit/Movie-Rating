@@ -20,7 +20,7 @@ function getRequestedTitle() {
 
 function isAiEnabled() {
   const params = new URLSearchParams(window.location.search);
-  return params.get('ai') === 'true';
+  return params.get('ai') !== 'false';
 }
 
 function formatRatingItem(label, value) {
@@ -39,7 +39,7 @@ function renderMovieInfo(movie) {
 
   movieInfoEl.innerHTML = infoRows
     .filter(row => row.value)
-    .map(row => `<p><strong>${row.label}:</strong> ${row.value}</p>`) 
+    .map(row => `<p><strong>${row.label}:</strong> ${row.value}</p>`)
     .join('');
 }
 
@@ -68,7 +68,7 @@ function renderAiSummary(summary, enabled, error) {
 
   aiSummaryEl.textContent = enabled
     ? 'No AI summary is available for this movie yet.'
-    : 'Add ?ai=true to the URL to generate an AI summary.';
+    : 'AI summary is turned off.';
 }
 
 function renderPoster(movie) {
@@ -120,7 +120,7 @@ function handleSearch(event) {
   if (isAiEnabled()) {
     url.searchParams.set('ai', 'true');
   } else {
-    url.searchParams.delete('ai');
+    url.searchParams.set('ai', 'false');
   }
   window.history.pushState({}, '', url.toString());
   initialize();
@@ -131,10 +131,20 @@ async function initialize() {
   const useAi = isAiEnabled();
 
   updateSearchInput(title);
+
+  if (!title) {
+    movieTitleEl.textContent = '';
+    movieInfoEl.textContent = 'Search for a movie to see details.';
+    ratingsInfoEl.innerHTML = '';
+    aiSummaryEl.textContent = '';
+    posterEl.src = FALLBACK_POSTER;
+    return;
+  }
+
   movieTitleEl.textContent = title;
   movieInfoEl.textContent = 'Loading movie details...';
   ratingsInfoEl.innerHTML = '<p>Loading ratings...</p>';
-  aiSummaryEl.textContent = useAi ? 'Loading AI summary...' : 'AI summary is disabled. Add ?ai=true to the URL to enable it.';
+  aiSummaryEl.textContent = useAi ? 'Loading AI summary...' : 'AI summary is turned off.';
 
   try {
     const data = await fetchMovieData(title, useAi);
@@ -166,12 +176,11 @@ window.addEventListener('DOMContentLoaded', () => {
   searchFormEl?.addEventListener('submit', handleSearch);
 });
 
-
 function december(){
     const music = new Audio('./music/EverythingIsOkay.mp3');
     music.play();
     movieInfoEl.textContent = 'You found it...';
-    aiSummaryEl.textContent = `... December 2025, I found myself. And everyday is a day to [REDACTED].`
+    aiSummaryEl.textContent = `... December 2025, I found myself. And everyday is a day to [REDACTED].`;
     posterEl.src = './images/December_2025.webp';
     posterEl.alt = 'December 2025';
     ratingsInfoEl.innerHTML = '';
