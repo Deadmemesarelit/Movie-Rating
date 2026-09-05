@@ -37,7 +37,7 @@ function renderMovieInfo(movie) {
     { label: 'Language', value: movie.language }
   ];
 
-  movieInfoEl.innerHTML = infoRows
+  movieInfoEl.textContent = infoRows
     .filter(row => row.value)
     .map(row => `<p><strong>${row.label}:</strong> ${row.value}</p>`)
     .join('');
@@ -48,7 +48,7 @@ function renderRatings(movie) {
   const imdbRating = movie.imdbRating || 'N/A';
   const metascore = movie.metascore || 'N/A';
 
-  ratingsInfoEl.innerHTML = `
+  ratingsInfoEl.textContent = `
     ${formatRatingItem('🎬 IMDb: ', imdbRating)}
     ${formatRatingItem('🍅 Rotten Tomatoes: ', rottenTomatoes)}
     ${formatRatingItem('📊 MetaScore: ', metascore)}
@@ -130,7 +130,7 @@ async function initialize() {
   if (!title) {
     movieTitleEl.textContent = '';
     movieInfoEl.textContent = 'Search for a movie to see details.';
-    ratingsInfoEl.innerHTML = '';
+    ratingsInfoEl.textContent = '';
     aiSummaryEl.textContent = '';
     posterEl.src = FALLBACK_POSTER;
     return;
@@ -138,7 +138,7 @@ async function initialize() {
 
   movieTitleEl.textContent = title;
   movieInfoEl.textContent = 'Loading movie details...';
-  ratingsInfoEl.innerHTML = '<p>Loading ratings...</p>';
+  ratingsInfoEl.textContent = '<p>Loading ratings...</p>';
   aiSummaryEl.textContent = useAi ? 'Loading AI summary...' : 'AI summary is turned off.';
 
   try {
@@ -152,7 +152,7 @@ async function initialize() {
     renderAiSummary(data.aiSummary, useAi, data.aiError);
   } catch (error) {
     movieInfoEl.textContent = `Unable to load details: ${error.message}`;
-    ratingsInfoEl.innerHTML = '';
+    ratingsInfoEl.textContent = '';
     aiSummaryEl.textContent = '';
     console.error(error);
   }
