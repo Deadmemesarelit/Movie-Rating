@@ -8,7 +8,7 @@ const app = express();
 const PORT = process.env.PORT || 3000;
 const OMDB_API_KEY = process.env.OMDB_API_KEY || process.env.IMDB_API_KEY || process.env.IMBD_API_KEY;
 const GROQ_API_KEY = process.env.GROQ_API_KEY;
-const twentyTwentyFive = process.env.REDACTED;
+
 
 if (!OMDB_API_KEY) {
   console.warn('Warning: OMDB_API_KEY / IMDB_API_KEY / IMBD_API_KEY is not set. Movie lookups will fail.');
@@ -103,9 +103,7 @@ app.get('/api/movie', async (req, res) => {
   }
 
   try {
-    if (title.toLowerCase() === 'redacted') {
-      return res.json(twentyTwentyFive);
-    }
+  
 
     const omdbUrl = new URL('https://www.omdbapi.com/');
     omdbUrl.searchParams.set('apikey', OMDB_API_KEY);
